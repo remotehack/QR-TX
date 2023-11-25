@@ -136,7 +136,9 @@ export class QRSocket {
                                 this.txi++
                                 this.queue.shift();
 
-                                this.setQR('tx', 'tx:' + this.txi + ',' + this.queue[0])
+                                this.showLatest()
+
+                                // this.setQR('tx', 'tx:' + this.txi + ',' + this.queue[0])
 
                             }
 

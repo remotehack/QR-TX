@@ -23,6 +23,7 @@
       <output id="out"></output>
       <input name="message" />
     </form>
+    <button id="add50">+50</button>
 
     <script type="importmap">
       {
@@ -41,23 +42,35 @@
 
       sock.start();
 
-      sock.on("data", (d) => {
-        out.innerText += "< " + d + "\n";
-        out.scrollTo({
-          top: out.scrollHeight,
-          behavior: "smooth",
-        });
-      });
-
       sock.send("Hello");
       sock.send("World");
       //   sock.send("One");
       //   sock.send("two");
       //   sock.send("TRHREEEEEEE");
 
-      for (let i = 0; i < 100; i++) {
-        sock.send("test - " + i + "---" + Math.random().toString(32));
+      sock.on("data", (message) => {
+        append("< " + message);
+      });
+
+      function append(message) {
+        out.innerText += message + "\n";
+        out.scrollTo({
+          top: out.scrollHeight,
+          behavior: "smooth",
+        });
       }
+
+      let tt = 0;
+      function add50() {
+        for (let i = 0; i < 50; i++) {
+          const message =
+            "T:" + tt++ + " * " + Math.random().toString(32).slice(3);
+
+          append("> " + message);
+          sock.send(message);
+        }
+      }
+      document.querySelector("#add50").onclick = add50;
 
       f.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -65,12 +78,7 @@
         const d = new FormData(f);
         const message = d.get("message");
         sock.send(message);
-
-        out.innerText += "> " + message + "\n";
-        out.scrollTo({
-          top: out.scrollHeight,
-          behavior: "smooth",
-        });
+        append("> " + message);
 
         f.reset();
       });
