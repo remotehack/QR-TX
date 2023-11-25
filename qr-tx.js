@@ -89,9 +89,9 @@ export class QRSocket {
             await new Promise(re => setTimeout(re, 2000))
             while (this.running) {
                 try {
-                    console.time("scan")
+                    // console.time("scan")
                     const codes = await detector.detect(video)
-                    console.log(codes)
+                    // console.log(codes)
                     for (const code of codes) {
 
                         const value = code.rawValue
@@ -119,9 +119,9 @@ export class QRSocket {
 
                             this.rxi = code
 
-                            const data = rest.slice(code.length + 1);
+                            const data = rest.slice(rest.indexOf(',') + 1);
 
-                            // console.log("DATA", data)
+                            console.log("DATA", data)
 
                             this.listeners.forEach(l => l(data))
 
@@ -156,9 +156,11 @@ export class QRSocket {
 
                         }
                     }
-                    console.timeEnd("scan")
+                    // console.timeEnd("scan")
 
-                    await new Promise(re => setTimeout(re, 1000))// todo reduce
+                    // await new Promise(re => setTimeout(re, 100))// todo reduce
+                    // avoid when tab is hidden
+                    await new Promise(requestAnimationFrame)
                 } catch (e) {// video not ready?
                     console.error(e)
                     await new Promise(re => setTimeout(re, 1000))
