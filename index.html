@@ -5,6 +5,7 @@
     <style>
       body {
         width: 100vw;
+        font-family: sans-serif;
       }
       output {
         white-space: pre;
@@ -14,11 +15,20 @@
         font-family: monospace;
         overflow: scroll;
       }
+      h1 small {
+        font-size: 0.5em;
+        opacity: 0.9;
+        font-weight: 100;
+      }
     </style>
   </head>
   <body>
-    <h1>qr-tx</h1>
-    <h3>"Qwertex"</h3>
+    <h1>
+      qr-tx
+
+      <small>"Qwertex"</small>
+    </h1>
+
     <form id="f">
       <output id="out"></output>
       <input name="message" />
@@ -42,8 +52,8 @@
 
       sock.start();
 
-      sock.send("Hello");
-      sock.send("World");
+      //   sock.send("Hello");
+      //   sock.send("World");
       //   sock.send("One");
       //   sock.send("two");
       //   sock.send("TRHREEEEEEE");

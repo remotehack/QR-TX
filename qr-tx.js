@@ -11,31 +11,17 @@ import QRious from 'https://cdn.skypack.dev/qrious'
 
 
 const template = new DOMParser().parseFromString(`
-<section>
+<section style="display: flex; flex-direction: column;">
     <video style="height: 30vmin"></video>
 
-    <div style="display: flex; width: 100vw">
-        <img data-qr="rx" style="width: 45vw; height: auto" />
-        <img data-qr="tx" style="width: 45vw; height: auto" />
+    <div style="display: flex; width: 100vw;">
+        <img data-qr="rx" style="width: 45vw; height: auto; margin: 1vw" />
+        <img data-qr="tx" style="width: 45vw; height: auto; margin: 1vw" />
     </div>
-
-
-    <output></output>
 
 </section>
 `, "text/html").body;
 
-/*
-const socket = new QRRCode()
-
-socket.send("foo")
-
-socket.addEventListener("data", ...)
-
-socket.element // video element
-
-socket.close()
-*/
 
 
 const detector = new BarcodeDetector({
