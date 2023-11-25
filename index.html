@@ -1,1 +1,67 @@
-<h1>QR-TX!</h1>
+<html>
+  <head>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        width: 100vw;
+      }
+      output {
+        white-space: pre;
+        background: #eee;
+        height: 6em;
+        display: block;
+        font-family: monospace;
+        overflow: scroll;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>qr-tx</h1>
+    <h3>"Qwertex"</h3>
+    <form id="f">
+      <output id="out"></output>
+      <input name="message" />
+    </form>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "qrious": "https://cdn.skypack.dev/qrious"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import { QRSocket } from "./qr-tx.js";
+
+      const sock = new QRSocket();
+
+      document.body.appendChild(sock.element);
+
+      sock.start();
+
+      sock.on("data", (d) => {
+        out.innerText += "< " + d + "\n";
+      });
+
+      sock.send("Hello");
+      sock.send("World");
+      //   sock.send("One");
+      //   sock.send("two");
+      //   sock.send("TRHREEEEEEE");
+
+      f.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const d = new FormData(f);
+        const message = d.get("message");
+        sock.send(message);
+
+        out.innerText += "> " + message + "\n";
+
+        f.reset();
+      });
+    </script>
+  </body>
+</html>
