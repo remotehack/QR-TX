@@ -1,16 +1,7 @@
 
-import QRious from 'https://cdn.skypack.dev/qrious'
-
-(function () {
-    var qr = new QRious({
-        element: document.getElementById('qr'),
-        value: 'https://github.com/neocotic/qrious'
-    });
-    console.log(qr.toDataURL())
-})();
+import QRious from 'qrious'
 
 const blank = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
-
 
 const template = new DOMParser().parseFromString(`
 <section style="display: flex; flex-direction: column;">
@@ -23,8 +14,6 @@ const template = new DOMParser().parseFromString(`
 
 </section>
 `, "text/html").body;
-
-
 
 
 const detector = new BarcodeDetector({
@@ -141,13 +130,10 @@ export class QRSocket extends EventTarget {
     }
 
     setQR(name, value) {
-        // Show 
         new QRious({
             element: this.element.querySelector(`[data-qr="${name}"]`),
             value
         });
-
     }
-
 }
 

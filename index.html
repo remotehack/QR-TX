@@ -2,39 +2,7 @@
   <head>
     <title>Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        width: 100vw;
-        font-family: sans-serif;
-      }
-      output {
-        white-space: pre;
-        background: #eee;
-        height: 6em;
-        display: block;
-        font-family: monospace;
-        overflow: scroll;
-      }
-      h1 small {
-        font-size: 0.5em;
-        opacity: 0.9;
-        font-weight: 100;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>
-      qr-tx
-
-      <small>"Qwertex"</small>
-    </h1>
-
-    <form id="f">
-      <output id="out"></output>
-      <input name="message" />
-    </form>
-    <button id="add50">+50</button>
-
+    <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
         "imports": {
@@ -42,6 +10,26 @@
         }
       }
     </script>
+  </head>
+  <body>
+    <h1>
+      qr-tx
+      <small>"Qwertex"</small>
+    </h1>
+
+    <main>
+      <form class="chat">
+        <ol class="messageList"></ol>
+        <div class="messageInput">
+          <input type="text" name="message" />
+          <input type="submit" value="send" />
+        </div>
+      </form>
+      <details>
+        <summary>Debug</summary>
+        <button id="add50">50 x debug</button>
+      </details>
+    </main>
 
     <script type="module">
       import { QRSocket } from "./qr-tx.js";
@@ -53,13 +41,20 @@
       sock.start();
 
       sock.addEventListener("message", (message) => {
-        append("< " + message.data);
+        append(message.data, "inbound");
       });
 
-      function append(message) {
-        out.innerText += message + "\n";
-        out.scrollTo({
-          top: out.scrollHeight,
+      const messageList = document.querySelector("ol.messageList");
+
+      function append(message, classname) {
+        const li = document.createElement("li");
+        li.innerText = message;
+        li.className = classname;
+        messageList.appendChild(li);
+
+        // out.innerText += message + "\n";
+        messageList.scrollTo({
+          top: messageList.scrollHeight,
           behavior: "smooth",
         });
       }
@@ -67,14 +62,17 @@
       let tt = 0;
       function add50() {
         for (let i = 0; i < 50; i++) {
-          const message =
-            "T:" + tt++ + " * " + Math.random().toString(32).slice(3);
+          const message = `${Math.random()
+            .toString(32)
+            .slice(3)} (test message #${tt++})`;
 
-          append("> " + message);
+          append(message, "outbound");
           sock.send(message);
         }
       }
-      document.querySelector("#add50").addEventListenerclick = add50;
+      document.querySelector("#add50").addEventListener("click", add50);
+
+      const f = document.querySelector("form.chat");
 
       f.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -82,7 +80,7 @@
         const d = new FormData(f);
         const message = d.get("message");
         sock.send(message);
-        append("> " + message);
+        append(message, "outbound");
 
         f.reset();
       });
