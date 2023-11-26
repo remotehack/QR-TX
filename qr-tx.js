@@ -9,18 +9,21 @@ import QRious from 'https://cdn.skypack.dev/qrious'
     console.log(qr.toDataURL())
 })();
 
+const blank = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
+
 
 const template = new DOMParser().parseFromString(`
 <section style="display: flex; flex-direction: column;">
     <video style="height: 30vmin"></video>
 
     <div style="display: flex; width: 100vw;">
-        <img data-qr="rx" style="width: 45vw; height: auto; margin: 1vw" />
-        <img data-qr="tx" style="width: 45vw; height: auto; margin: 1vw" />
+        <img src="${blank}" data-qr="rx" style="width: 45vw; height: auto; margin: 1vw; image-rendering: pixelated" />
+        <img src="${blank}" data-qr="tx" style="width: 45vw; height: auto; margin: 1vw; image-rendering: pixelated" />
     </div>
 
 </section>
 `, "text/html").body;
+
 
 
 
@@ -29,8 +32,9 @@ const detector = new BarcodeDetector({
 });
 
 
-export class QRSocket {
+export class QRSocket extends EventTarget {
     constructor() {
+        super();
         this.element = template.cloneNode(true)
         this.queue = []
         this.txi = 0;
@@ -51,9 +55,6 @@ export class QRSocket {
         }
     }
 
-    on(type, callback) {
-        this.listeners.add(callback)
-    }
 
     async start() {
         this.setQR('rx', document.location.href)
@@ -89,8 +90,6 @@ export class QRSocket {
                             console.log("START")
                             this.showLatest()
 
-                            // this.setQR('tx', 'tx:' + this.txi + ',' + this.queue[0])
-
                         }
 
                         if (value.startsWith('tx:')) {
@@ -109,7 +108,10 @@ export class QRSocket {
 
                             console.log("DATA", data)
 
-                            this.listeners.forEach(l => l(data))
+
+                            this.dispatchEvent(
+                                new MessageEvent('message', { data })
+                            );
 
                             this.setQR('rx', 'rx:' + code)
 
@@ -123,30 +125,9 @@ export class QRSocket {
                                 this.queue.shift();
 
                                 this.showLatest()
-
-                                // this.setQR('tx', 'tx:' + this.txi + ',' + this.queue[0])
-
                             }
-
-                            // const [code] = rest.split(',')
-
-                            // if (code === this.rxi) { continue }
-
-                            // this.rxi = code
-
-                            // const data = rest.slice(code.length + 1);
-
-                            // console.log("DATA", data)
-
-                            // this.listeners.forEach(l => l(data))
-
-                            // this.setQR('rx', 'rx:' + code)
-
                         }
                     }
-                    // console.timeEnd("scan")
-
-                    // await new Promise(re => setTimeout(re, 100))// todo reduce
                     // avoid when tab is hidden
                     await new Promise(requestAnimationFrame)
                 } catch (e) {// video not ready?
@@ -157,8 +138,6 @@ export class QRSocket {
         }
 
         check()
-
-
     }
 
     setQR(name, value) {
@@ -172,6 +151,3 @@ export class QRSocket {
 
 }
 
-
-
-console.log("---", template)

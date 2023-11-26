@@ -52,14 +52,8 @@
 
       sock.start();
 
-      //   sock.send("Hello");
-      //   sock.send("World");
-      //   sock.send("One");
-      //   sock.send("two");
-      //   sock.send("TRHREEEEEEE");
-
-      sock.on("data", (message) => {
-        append("< " + message);
+      sock.addEventListener("message", (message) => {
+        append("< " + message.data);
       });
 
       function append(message) {
@@ -80,7 +74,7 @@
           sock.send(message);
         }
       }
-      document.querySelector("#add50").onclick = add50;
+      document.querySelector("#add50").addEventListenerclick = add50;
 
       f.addEventListener("submit", (e) => {
         e.preventDefault();
