@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/remotehack/QR-TX/issues"
   },
-  "homepage": "https://github.com/remotehack/QR-TX#readme"
+  "homepage": "https://github.com/remotehack/QR-TX#readme",
+  "dependencies": {
+    "qrious": "^4.0.2"
+  }
 }
