@@ -28,6 +28,7 @@
       <details>
         <summary>Debug</summary>
         <button id="add50">50 x debug</button>
+        <button id="stop">please stop</button>
       </details>
     </main>
 
@@ -37,8 +38,6 @@
       const sock = new QRSocket();
 
       document.body.appendChild(sock.element);
-
-      sock.start();
 
       sock.addEventListener("message", (message) => {
         append(message.data, "inbound");
@@ -71,6 +70,9 @@
         }
       }
       document.querySelector("#add50").addEventListener("click", add50);
+      document
+        .querySelector("#stop")
+        .addEventListener("click", () => sock.stop());
 
       const f = document.querySelector("form.chat");
 

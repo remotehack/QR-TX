@@ -55,13 +55,17 @@ const detector = new BarcodeDetector({
 
 
 export class QRSocket extends EventTarget {
-    constructor() {
+    constructor(options = {}) {
         super();
         this.element = template.cloneNode(true)
         this.queue = []
         this.txi = 0;
         this.rxi = -1;
         this.listeners = new Set();
+
+        (options.target || document.body).appendChild(this.element);
+
+        this.start()
     }
 
     async send(data) {
@@ -81,7 +85,7 @@ export class QRSocket extends EventTarget {
     async start() {
         this.setQR('rx', document.location.href)
 
-        const stream = await navigator.mediaDevices.getUserMedia({
+        const stream = window.xx = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user'
             },
@@ -98,14 +102,11 @@ export class QRSocket extends EventTarget {
             await new Promise(re => setTimeout(re, 2000))
             while (this.running) {
                 try {
-                    // console.time("scan")
                     const codes = await detector.detect(video)
-                    // console.log(codes)
+
                     for (const code of codes) {
 
                         const value = code.rawValue
-
-
                         if (value === document.location.href) {
                             // start
 
@@ -167,6 +168,15 @@ export class QRSocket extends EventTarget {
             element: this.element.querySelector(`[data-qr="${name}"]`),
             value
         });
+    }
+
+    stop() {
+        this.running = false;
+        const video = this.element.querySelector('video')
+        video.srcObject.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        this.element.remove()
     }
 }
 
