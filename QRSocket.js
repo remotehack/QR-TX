@@ -3,14 +3,47 @@ import QRious from 'qrious'
 
 const blank = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
 
-const template = new DOMParser().parseFromString(`
-<section style="display: flex; flex-direction: column;">
-    <video style="height: 30vmin"></video>
+const className = "✨" + Math.random().toString(36).slice(2)
 
-    <div style="display: flex; width: 100vw;">
-        <img src="${blank}" data-qr="rx" style="width: 45vw; height: auto; margin: 1vw; image-rendering: pixelated" />
-        <img src="${blank}" data-qr="tx" style="width: 45vw; height: auto; margin: 1vw; image-rendering: pixelated" />
-    </div>
+const template = new DOMParser().parseFromString(`
+<section class="${className}">
+    <img src="${blank}" data-qr="rx" />
+    <video></video>
+    <img src="${blank}" data-qr="tx" />
+
+    <style>
+    .${className} {
+        display: flex;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+    }
+    .${className} img {
+        margin: 3vmin;
+        image-rendering: pixelated;
+        flex: 1;
+        height: auto;
+        width: auto;
+        max-height: 80vh;
+        max-width: 80vw;
+    }
+    .${className} video {
+        flex: 0.3;
+        max-width: 20vw;
+        max-height: 20vh;
+    }
+    @media (orientation: landscape) {
+        .${className} {
+          flex-direction: row;
+        }
+    }
+    @media (orientation: portrait) {
+        .${className} {
+            flex-direction: column;
+        }
+    }
+</style>
 
 </section>
 `, "text/html").body;
