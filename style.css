@@ -1,10 +1,12 @@
 body {
-  width: 100vw;
-  font-family: sans-serif;
+  font-family: monospace;
+  background-color: #f2f2f2;
+}
+a {
+  color: rgb(230, 0, 255);
 }
 output {
   white-space: pre;
-  background: #eee;
   height: 6em;
   display: block;
   font-family: monospace;
@@ -14,6 +16,12 @@ h1 small {
   font-size: 0.5em;
   opacity: 0.9;
   font-weight: 100;
+}
+
+div.chatdemo {
+  display: grid;
+  max-width: 90vw;
+  grid-template-columns: 1fr 10em;
 }
 
 .chat {
@@ -62,10 +70,4 @@ h1 small {
   align-self: flex-end;
   background-color: #08f5;
   border-radius: 8px 10px 0 10px;
-}
-
-main {
-  display: grid;
-  max-width: 90vw;
-  grid-template-columns: 1fr 10em;
 }
