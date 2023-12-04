@@ -3,10 +3,12 @@
     <title>Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="style.css" />
+    <script src="simplepeer.min.js"></script>
     <script type="importmap">
       {
         "imports": {
-          "qrious": "https://cdn.skypack.dev/qrious"
+          "qrious": "https://cdn.skypack.dev/qrious",
+          "simple-peer": "https://cdn.skypack.dev/simple-peer"
         }
       }
     </script>
@@ -29,9 +31,19 @@
 
       <ul>
         <li>
-          <a href="?demo=chat">Chat!</a>
+          <a href="?demo=chat">Chat </a>
           Props to <a href="https://www.ticklethepanda.dev/">Panda</a> 🙌 for
           the idea and for being party to the first MITM attack over QR codes.
+        </li>
+
+        <!--li>
+          <a href="?demo=speed">Speed test</a>
+          See how efficient QRSocket is ⚡️
+        </li-->
+
+        <li>
+          <a href="?demo=peer">WebRTC camera swap</a>
+          Negotiate a peer-to-peer connection without a signalling server.
         </li>
       </ul>
     </main>
@@ -56,8 +68,6 @@
         import { QRSocket } from "./QRSocket.js";
 
         const sock = new QRSocket();
-
-        document.body.appendChild(sock.element);
 
         sock.addEventListener("message", (message) => {
           append(message.data, "inbound");
@@ -106,6 +116,77 @@
 
           f.reset();
         });
+      </script>
+    </template>
+
+    <template data-demo="peer">
+      <script type="module">
+        import { QRSocket } from "./QRSocket.js";
+
+        // import Peer from "simple-peer";
+        const Peer = window.SimplePeer;
+
+        const qsock = new QRSocket();
+
+        const hello = "Hello! " + Math.random();
+        qsock.send(hello);
+
+        async function setup(event) {
+          qsock.removeEventListener("message", setup);
+
+          const data = event.data;
+          const initiator = data > hello;
+          console.log("initiator", initiator);
+
+          const stream = qsock.stream;
+          if (!stream) throw new Error("No stream"); //debug
+
+          var peer = new Peer({ initiator, stream });
+
+          peer.on("signal", (data) => {
+            qsock.send(JSON.stringify(data));
+          });
+
+          qsock.addEventListener("message", (event) => {
+            peer.signal(JSON.parse(event.data));
+          });
+
+          peer.on("connect", () => {
+            console.log("CONNECTTED!");
+          });
+
+          peer.on("data", (data) => {
+            // got a data channel message
+            console.log("got a message from peer1: " + data);
+          });
+
+          peer.on("stream", (stream) => {
+            // got remote video stream, now let's show it in a video tag
+            console.log("got a stream!");
+            var video = document.createElement("video");
+            document.body.appendChild(video);
+            video.srcObject = stream;
+            video.style.position = "fixed";
+            video.style.top = 0;
+            video.style.left = 0;
+            video.style.zIndex = 1000;
+            video.style.width = "100%";
+            video.style.height = "100%";
+            video.style.objectFit = "cover";
+
+            video.play();
+
+            // TODO, disconnect after a while
+
+            // setTimeout(() => {
+            //   qsock.stop(false);
+            // }, 5000);
+
+            // qsock.stop(false);
+          });
+        }
+
+        qsock.addEventListener("message", setup);
       </script>
     </template>
 

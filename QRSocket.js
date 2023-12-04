@@ -15,8 +15,8 @@ const template = new DOMParser().parseFromString(`
     .${className} {
         display: flex;
         align-items: center;
-        width: 100vw;
-        height: 100vh;
+        width: 90vw;
+        height: 90vh;
         position: absolute;
     }
     .${className} img {
@@ -79,7 +79,7 @@ export class QRSocket extends EventTarget {
             for (const chunk of chunks) {
                 this.queue.push("+" + chunk)
             }
-            this.queue.push("!")
+            this.queue.push("!") // this could include the last chunk
         } else {
             this.queue.push(data)
         }
@@ -99,7 +99,7 @@ export class QRSocket extends EventTarget {
     async start() {
         this.setQR('rx', document.location.href)
 
-        const stream = window.xx = await navigator.mediaDevices.getUserMedia({
+        const stream = this.stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user'
             },
