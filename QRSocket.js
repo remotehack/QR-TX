@@ -53,6 +53,8 @@ const detector = new BarcodeDetector({
     formats: ["qr_code"],
 });
 
+const chunking = true;
+
 
 export class QRSocket extends EventTarget {
     constructor(options = {}) {
@@ -62,6 +64,8 @@ export class QRSocket extends EventTarget {
         this.txi = 0;
         this.rxi = -1;
         this.listeners = new Set();
+        this.options = options;
+        this.currenChunk = '';
 
         (options.target || document.body).appendChild(this.element);
 
@@ -69,7 +73,17 @@ export class QRSocket extends EventTarget {
     }
 
     async send(data) {
-        this.queue.push(data)
+        console.log("SEND", data)
+        if (chunking) {
+            const chunks = data.match(/.{1,48}/g)
+            for (const chunk of chunks) {
+                this.queue.push("+" + chunk)
+            }
+            this.queue.push("!")
+        } else {
+            this.queue.push(data)
+        }
+
         this.showLatest()
     }
 
@@ -109,10 +123,8 @@ export class QRSocket extends EventTarget {
                         const value = code.rawValue
                         if (value === document.location.href) {
                             // start
-
-                            console.log("START")
+                            // console.log("START")
                             this.showLatest()
-
                         }
 
                         if (value.startsWith('tx:')) {
@@ -121,7 +133,7 @@ export class QRSocket extends EventTarget {
                             const code = parseInt(rest.split(',')[0])
 
                             if (code === this.rxi) {
-                                console.log("already seen", code)
+                                // console.log("already seen", code)
                                 continue
                             }
 
@@ -131,10 +143,25 @@ export class QRSocket extends EventTarget {
 
                             console.log("DATA", data)
 
+                            if (chunking) {
+                                const first = data[0]
+                                if (first === '+') {
+                                    this.currenChunk += data.slice(1)
+                                } else if (first === '!') {
+                                    const data = this.currenChunk;
+                                    this.dispatchEvent(
+                                        new MessageEvent('message', { data })
+                                    )
+                                    this.currenChunk = ''
+                                } else {
+                                    console.warn("Invalid chunk", data)
+                                }
+                            } else {
+                                this.dispatchEvent(
+                                    new MessageEvent('message', { data })
+                                );
+                            }
 
-                            this.dispatchEvent(
-                                new MessageEvent('message', { data })
-                            );
 
                             this.setQR('rx', 'rx:' + code)
 
@@ -170,12 +197,14 @@ export class QRSocket extends EventTarget {
         });
     }
 
-    stop() {
+    stop(discardStream = true) {
         this.running = false;
         const video = this.element.querySelector('video')
-        video.srcObject.getTracks().forEach(function (track) {
-            track.stop();
-        });
+        if (discardStream) {
+            video.srcObject.getTracks().forEach(function (track) {
+                track.stop();
+            });
+        }
         this.element.remove()
     }
 }
