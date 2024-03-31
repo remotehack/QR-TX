@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A QR-code based socket (yes, I know)",
   "main": "QRSocket.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,5 +19,9 @@
   "homepage": "https://github.com/remotehack/QR-TX#readme",
   "dependencies": {
     "qrious": "^4.0.2"
+  },
+  "devDependencies": {
+    "chai": "^5.1.0",
+    "mocha": "^10.4.0"
   }
 }
