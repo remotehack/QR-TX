@@ -1,5 +1,6 @@
 
 import QRious from 'qrious'
+import { SocketBase } from './lib/handler.js';
 
 const blank = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
 
@@ -7,16 +8,15 @@ const className = "✨" + Math.random().toString(36).slice(2)
 
 const template = new DOMParser().parseFromString(`
 <section class="${className}">
-    <img src="${blank}" data-qr="rx" />
+    <img src="${blank}"/>
     <video></video>
-    <img src="${blank}" data-qr="tx" />
 
     <style>
     .${className} {
         display: flex;
         align-items: center;
-        width: 90vw;
-        height: 90vh;
+        width: 90vmin;
+        height: 90vmin;
         position: absolute;
     }
     .${className} img {
@@ -25,8 +25,9 @@ const template = new DOMParser().parseFromString(`
         flex: 1;
         height: auto;
         width: auto;
-        max-height: 80vh;
-        max-width: 80vw;
+        max-height: 80vmin;
+        max-width: 80vmin;
+        aspect-ratio: 1 / 1;
     }
     .${className} video {
         flex: 0.3;
@@ -46,7 +47,7 @@ const template = new DOMParser().parseFromString(`
 </style>
 
 </section>
-`, "text/html").body;
+`, "text/html").body.firstChild;
 
 
 const detector = new BarcodeDetector({
@@ -59,11 +60,13 @@ const chunking = true;
 export class QRSocket extends EventTarget {
     constructor(options = {}) {
         super();
+        this.sock = new SocketBase(document.location.href)
+        window.q = this
+
         this.element = template.cloneNode(true)
         this.queue = []
         this.txi = 0;
         this.rxi = -1;
-        this.listeners = new Set();
         this.options = options;
         this.currenChunk = '';
 
@@ -73,31 +76,16 @@ export class QRSocket extends EventTarget {
     }
 
     async send(data) {
-        console.log("SEND", data)
-        if (chunking) {
-            const chunks = data.match(/.{1,48}/g)
-            for (const chunk of chunks) {
-                this.queue.push("+" + chunk)
-            }
-            this.queue.push("!") // this could include the last chunk
-        } else {
-            this.queue.push(data)
-        }
-
-        this.showLatest()
+        return this.sock.enqueueMessage(data)
     }
 
     showLatest() {
-        if (this.queue.length > 0)
-            this.setQR('tx', 'tx:' + this.txi + ',' + this.queue[0])
-        else {
-            this.setQR('tx', 'noop')
-        }
+        this.setQR('rx', this.sock.current);
     }
 
 
     async start() {
-        this.setQR('rx', document.location.href)
+        this.setQR('rx', this.sock.current);
 
         const stream = this.stream = await navigator.mediaDevices.getUserMedia({
             video: {
@@ -119,65 +107,20 @@ export class QRSocket extends EventTarget {
                     const codes = await detector.detect(video)
 
                     for (const code of codes) {
+                        const completed = this.sock.handleObservation(code.rawValue);
 
-                        const value = code.rawValue
-                        if (value === document.location.href) {
-                            // start
-                            // console.log("START")
-                            this.showLatest()
+                        if (completed) {
+                            this.dispatchEvent(
+                                new MessageEvent('message', { data: completed })
+                            )
                         }
 
-                        if (value.startsWith('tx:')) {
-                            const rest = value.slice(3)
-
-                            const code = parseInt(rest.split(',')[0])
-
-                            if (code === this.rxi) {
-                                // console.log("already seen", code)
-                                continue
-                            }
-
-                            this.rxi = code
-
-                            const data = rest.slice(rest.indexOf(',') + 1);
-
-                            console.log("DATA", data)
-
-                            if (chunking) {
-                                const first = data[0]
-                                if (first === '+') {
-                                    this.currenChunk += data.slice(1)
-                                } else if (first === '!') {
-                                    const data = this.currenChunk;
-                                    this.dispatchEvent(
-                                        new MessageEvent('message', { data })
-                                    )
-                                    this.currenChunk = ''
-                                } else {
-                                    console.warn("Invalid chunk", data)
-                                }
-                            } else {
-                                this.dispatchEvent(
-                                    new MessageEvent('message', { data })
-                                );
-                            }
-
-
-                            this.setQR('rx', 'rx:' + code)
-
-                        }
-
-                        if (value.startsWith('rx:')) {
-                            const rxval = parseInt(value.slice(3))
-
-                            if (rxval === this.txi) {
-                                this.txi++
-                                this.queue.shift();
-
-                                this.showLatest()
-                            }
-                        }
                     }
+
+                    if (codes.length > 0) {
+                        this.setQR('rx', this.sock.current);
+                    }
+
                     // avoid when tab is hidden
                     await new Promise(requestAnimationFrame)
                 } catch (e) {// video not ready?
@@ -191,8 +134,9 @@ export class QRSocket extends EventTarget {
     }
 
     setQR(name, value) {
+        console.log("setQR:", name, value)
         new QRious({
-            element: this.element.querySelector(`[data-qr="${name}"]`),
+            element: this.element.querySelector(`img`),
             value
         });
     }
