@@ -71,3 +71,8 @@ div.chatdemo {
   background-color: #08f5;
   border-radius: 8px 10px 0 10px;
 }
+
+.speed-test #output {
+  font-size: 2em;
+  white-space: pre-wrap;
+}

@@ -36,13 +36,13 @@
           the idea and for being party to the first MITM attack over QR codes.
         </li>
 
-        <!--li>
+        <li>
           <a href="?demo=speed">Speed test</a>
           See how efficient QRSocket is ⚡️
-        </li-->
+        </li>
 
         <li>
-          <a href="?demo=peer">WebRTC camera swap</a>
+          <a href="?demo=signal">Signalling</a>
           Negotiate a peer-to-peer connection without a signalling server.
         </li>
       </ul>
@@ -119,7 +119,79 @@
       </script>
     </template>
 
-    <template data-demo="peer">
+    <template data-demo="speed">
+      <div class="speed-test">
+        <button name="start">Start Speed Test</button>
+        <p id="output"></p>
+      </div>
+
+      <script type="module">
+        import { QRSocket } from "./QRSocket.js";
+
+        (async function () {
+          const sock = new QRSocket();
+
+          const $startButton = document.querySelector("[name=start]");
+          const $send = document.querySelector("#send");
+          const $recv = document.querySelector("#recv");
+          const $log = document.querySelector("#output");
+
+          async function send(n) {
+            for (let i = 0; i < n; i++) {
+              // 1kb
+              await sock.send(randomString(768));
+
+              $log.textContent += "↑";
+            }
+          }
+
+          sock.addEventListener("message", ({ data }) => {
+            if (data === "start") return send(5);
+
+            $log.textContent += "↓";
+          });
+
+          //
+          $startButton.addEventListener("click", async () => {
+            $startButton.remove();
+            $log.textContent += "> ";
+
+            await sock.send("start");
+
+            const start = performance.now();
+            await send(5);
+            const end = performance.now();
+
+            const diff = (end - start) / 1000;
+            const formatter = new Intl.NumberFormat("en-gb", {
+              style: "unit",
+              unit: "second",
+              maximumFractionDigits: 1,
+            });
+
+            $log.textContent += " \n  5kb ";
+
+            setTimeout(() => {
+              $log.textContent += "in " + formatter.format(diff);
+            }, 1000);
+
+            setTimeout(() => {
+              $log.textContent += "\n\n\n  (very slow)";
+            }, 4000);
+
+            sock.stop();
+          });
+
+          function randomString(length) {
+            const array = new Uint8Array(length);
+            window.crypto.getRandomValues(array);
+            return btoa(String.fromCharCode.apply(null, array));
+          }
+        })();
+      </script>
+    </template>
+
+    <template data-demo="signal">
       <script type="module">
         import { QRSocket } from "./QRSocket.js";
 
