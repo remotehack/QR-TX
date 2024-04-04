@@ -32,7 +32,7 @@
       <ul>
         <li>
           <a href="?demo=send">Send</a>
-          Send some stuff ⚡️
+          Send some stuff 📦
         </li>
 
         <li>
@@ -44,6 +44,11 @@
         <li>
           <a href="?demo=speed">Speed test</a>
           See how efficient QRSocket is ⚡️
+        </li>
+
+        <li>
+          <a href="?demo=rpc">RPC</a>
+          RPC over QR
         </li>
 
         <li>
@@ -253,6 +258,71 @@
             window.crypto.getRandomValues(array);
             return btoa(String.fromCharCode.apply(null, array));
           }
+        })();
+      </script>
+    </template>
+
+    <template data-demo="rpc">
+      <script type="module">
+        import { QRSocket } from "./QRSocket.js";
+
+        (async function () {
+          const sock = new QRSocket();
+
+          let rpc_id = 0;
+          let callbacks = new Map();
+
+          window.rpc = {
+            async color() {
+              const id = rpc_id++;
+              const done = new Promise((res) => callbacks.set(id, res));
+              sock.send(JSON.stringify({ id: rpc_id, method: "color" }));
+              return done;
+            },
+          };
+
+          const impl = {
+            color() {
+              return "red";
+            },
+          };
+
+          sock.addEventListener("message", async ({ data }) => {
+            const { id, ...json } = JSON.parse(data);
+
+            if (impl[json.method]) {
+              const result = await impl[json.method]();
+              sock.send({ id, result });
+            } else {
+              if (callbacks.has(id)) {
+                callbacks.get(id)(result);
+                callbacks.delete(id);
+              }
+            }
+          });
+
+          function hello(n) {
+            return Array.from(
+              { length: 24 },
+              (_, i) => `Hello${"o".repeat(i)} World`
+            ).join(".");
+          }
+
+          document
+            .querySelector("nav.send")
+            .addEventListener("click", async (e) => {
+              const txt = e.target.innerText;
+
+              const text =
+                txt === "x 20" ? hello(20) : txt === "x 50" ? hello(20) : txt;
+
+              e.target.disabled = true;
+
+              await sock.send(text);
+              e.target.disabled = false;
+
+              // const
+            });
         })();
       </script>
     </template>
