@@ -8,32 +8,45 @@ const className = "✨" + Math.random().toString(36).slice(2)
 
 const template = new DOMParser().parseFromString(`
 <section class="${className}">
-    <img src="${blank}"/>
-    <video></video>
+    <figure class="qr">
+        <img src="${blank}"/>
+        <figcaption>[]</figcaption>
+    </figure>
+    <figure class="video">
+        <video></video>
+        <figcaption>[]</figcaption>
+    </figure>
 
     <style>
     .${className} {
         display: flex;
         align-items: center;
+        justify-items: top;
         width: 90vmin;
         height: 90vmin;
-        position: absolute;
+        margin:auto;
     }
     .${className} img {
-        margin: 3vmin;
         image-rendering: pixelated;
-        flex: 1;
-        height: auto;
-        width: auto;
-        max-height: 80vmin;
-        max-width: 80vmin;
+        height: 50vmin;
+        width: 50vmin;
         aspect-ratio: 1 / 1;
     }
     .${className} video {
-        flex: 0.3;
-        max-width: 20vw;
-        max-height: 20vh;
+        height: 25vmin;
+        width: 25vmin;
+        object-fit:cover;
     }
+    .${className} figcaption {
+        width: 25vmin;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .${className} .qr figcaption{
+        width: 50vmin;
+    }
+
     @media (orientation: landscape) {
         .${className} {
           flex-direction: row;
@@ -115,6 +128,8 @@ export class QRSocket extends EventTarget {
                             )
                         }
 
+                        this.element.querySelector('.video figcaption').innerText = code.rawValue
+
                     }
 
                     if (codes.length > 0) {
@@ -135,10 +150,12 @@ export class QRSocket extends EventTarget {
 
     setQR(name, value) {
         console.log("setQR:", name, value)
+
         new QRious({
             element: this.element.querySelector(`img`),
             value
         });
+        this.element.querySelector('.qr figcaption').innerText = value
     }
 
     stop(discardStream = true) {
