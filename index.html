@@ -31,6 +31,11 @@
 
       <ul>
         <li>
+          <a href="?demo=send">Send</a>
+          Send some stuff ⚡️
+        </li>
+
+        <li>
           <a href="?demo=chat">Chat </a>
           Props to <a href="https://www.ticklethepanda.dev/">Panda</a> 🙌 for
           the idea and for being party to the first MITM attack over QR codes.
@@ -48,6 +53,45 @@
       </ul>
     </main>
 
+    <template data-demo="send">
+      <nav class="send">
+        <button>Hello World</button>
+        <button>x 20</button>
+        <button>x 50</button>
+      </nav>
+
+      <script type="module">
+        import { QRSocket } from "./QRSocket.js";
+
+        (async function () {
+          const sock = new QRSocket();
+
+          function hello(n) {
+            return Array.from(
+              { length: 24 },
+              (_, i) => `Hello${"o".repeat(i)} World`
+            ).join(".");
+          }
+
+          document
+            .querySelector("nav.send")
+            .addEventListener("click", async (e) => {
+              const txt = e.target.innerText;
+
+              const text =
+                txt === "x 20" ? hello(20) : txt === "x 50" ? hello(20) : txt;
+
+              e.target.disabled = true;
+
+              await sock.send(text);
+              e.target.disabled = false;
+
+              // const
+            });
+        })();
+      </script>
+    </template>
+
     <template data-demo="chat">
       <div class="chatdemo">
         <form class="chat">
@@ -59,8 +103,7 @@
         </form>
         <section>
           <h3>Testing</h3>
-          <button id="add50">50 x debug</button>
-          <button id="stop">please stop</button>
+          <button id="add20">20 x lorem</button>
         </section>
       </div>
 
@@ -86,36 +129,59 @@
             top: messageList.scrollHeight,
             behavior: "smooth",
           });
+
+          return li;
         }
 
         let tt = 0;
-        function add50() {
-          for (let i = 0; i < 50; i++) {
-            const message = `${Math.random()
-              .toString(32)
-              .slice(3)} (test message #${tt++})`;
+        function add20() {
+          for (let i = 0; i < 20; i++) {
+            const message = generateLoremIpsum(Math.random() * 40);
 
-            append(message, "outbound");
-            sock.send(message);
+            const el = append(message, "outbound");
+            el.style.opacity = 0.3;
+            sock.send(message).then((el) => (el.style.opacity = 1));
           }
         }
-        document.querySelector("#add50").addEventListener("click", add50);
+        document.querySelector("#add20").addEventListener("click", add20);
         document
           .querySelector("#stop")
           .addEventListener("click", () => sock.stop());
 
         const f = document.querySelector("form.chat");
 
-        f.addEventListener("submit", (e) => {
+        f.addEventListener("submit", async (e) => {
           e.preventDefault();
 
           const d = new FormData(f);
           const message = d.get("message");
-          sock.send(message);
-          append(message, "outbound");
-
           f.reset();
+
+          const el = append(message, "outbound");
+          el.style.opacity = 0.3;
+
+          await sock.send(message);
+
+          el.style.opacity = 1;
         });
+
+        function generateLoremIpsum(n) {
+          const words = [
+            "lorem",
+            "ipsum",
+            "dolor",
+            "sit",
+            "amet",
+            "consectetur",
+            "adipiscing",
+            "elit",
+          ];
+          let message = "";
+          for (let i = 0; i < n; i++) {
+            message += words[Math.floor(Math.random() * words.length)] + " ";
+          }
+          return message.trim();
+        }
       </script>
     </template>
 

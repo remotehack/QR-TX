@@ -76,3 +76,7 @@ div.chatdemo {
   font-size: 2em;
   white-space: pre-wrap;
 }
+
+.send button {
+  font-size: 2em;
+}
