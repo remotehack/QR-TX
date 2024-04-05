@@ -89,6 +89,7 @@ export class QRSocket extends EventTarget {
     }
 
     async send(data) {
+        setTimeout(() => { this.showLatest() }, 10)
         return this.sock.enqueueMessage(data)
     }
 
