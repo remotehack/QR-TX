@@ -62,7 +62,7 @@
       <nav class="send">
         <button>Hello World</button>
         <button>x 20</button>
-        <button>x 50</button>
+        <button>x 100</button>
       </nav>
 
       <script type="module">
@@ -71,12 +71,26 @@
         (async function () {
           const sock = new QRSocket();
 
-          function hello(n) {
-            return Array.from(
-              { length: 24 },
-              (_, i) => `Hello${"o".repeat(i)} World`
-            ).join(".");
+          function hello(length) {
+            return "Hello World. ".repeat(length);
           }
+
+          sock.addEventListener("message", ({ data }) => {
+            const div = document.createElement("div");
+            div.innerText = data;
+            div.style.position = "absolute";
+            div.style.top = "0";
+            div.style.left = "0";
+            div.style.maxWidth = "90vw";
+            div.style.fontSize = "7vmin";
+            div.style.background = "#fff";
+            div.style.color = "#08f";
+            div.style.wordBreak = "break-all";
+            document.body.append(div);
+            setTimeout(() => {
+              div.remove();
+            }, 4000);
+          });
 
           document
             .querySelector("nav.send")
@@ -84,14 +98,12 @@
               const txt = e.target.innerText;
 
               const text =
-                txt === "x 20" ? hello(20) : txt === "x 50" ? hello(20) : txt;
+                txt === "x 20" ? hello(20) : txt === "x 100" ? hello(100) : txt;
 
               e.target.disabled = true;
 
               await sock.send(text);
               e.target.disabled = false;
-
-              // const
             });
         })();
       </script>
