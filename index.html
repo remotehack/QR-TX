@@ -260,66 +260,62 @@
     </template>
 
     <template data-demo="rpc">
+      <h2>window.qRPC 👀</h2>
       <script type="module">
         import { QRSocket } from "./QRSocket.js";
 
         (async function () {
           const sock = new QRSocket();
 
-          let rpc_id = 0;
+          let rpc_id = 10;
           let callbacks = new Map();
 
-          window.rpc = {
+          // this could be neater, but I don't have time
+          window.qRPC = {
             async color() {
               const id = rpc_id++;
               const done = new Promise((res) => callbacks.set(id, res));
-              sock.send(JSON.stringify({ id: rpc_id, method: "color" }));
+              sock.send(JSON.stringify({ id, method: "color" }));
               return done;
             },
           };
 
           const impl = {
             color() {
-              return "red";
+              return new Promise((resolve) => {
+                const inp = document.createElement("input");
+                inp.type = "color";
+                inp.style.width = "80vw";
+                inp.style.height = "80vh";
+                inp.style.position = "absolute";
+                inp.style.transform = "translate(-50%, -50%)";
+                inp.style.left = "50%";
+                inp.style.top = "50%";
+                document.body.appendChild(inp);
+                inp.addEventListener("change", (e) => {
+                  resolve(inp.value);
+                  inp.remove();
+                });
+              });
             },
           };
 
           sock.addEventListener("message", async ({ data }) => {
             const { id, ...json } = JSON.parse(data);
+            console.log("HANDLING", data, json);
 
             if (impl[json.method]) {
               const result = await impl[json.method]();
-              sock.send({ id, result });
+              sock.send(JSON.stringify({ id, result }));
             } else {
               if (callbacks.has(id)) {
-                callbacks.get(id)(result);
+                callbacks.get(id)(json.result);
                 callbacks.delete(id);
+              } else {
+                console.error("no callback found", id, callbacks);
               }
             }
           });
-
-          function hello(n) {
-            return Array.from(
-              { length: 24 },
-              (_, i) => `Hello${"o".repeat(i)} World`
-            ).join(".");
-          }
-
-          document
-            .querySelector("nav.send")
-            .addEventListener("click", async (e) => {
-              const txt = e.target.innerText;
-
-              const text =
-                txt === "x 20" ? hello(20) : txt === "x 50" ? hello(20) : txt;
-
-              e.target.disabled = true;
-
-              await sock.send(text);
-              e.target.disabled = false;
-
-              // const
-            });
         })();
       </script>
     </template>
