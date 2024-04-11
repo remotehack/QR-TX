@@ -55,6 +55,11 @@
           <a href="?demo=signal">Signalling</a>
           Negotiate a peer-to-peer connection without a signalling server.
         </li>
+
+        <li>
+          <a href="?demo=libs">Demo: libs</a>
+          Demo qrious / BarcodeDetector
+        </li>
       </ul>
     </main>
 
@@ -400,6 +405,49 @@
         }
 
         qsock.addEventListener("message", setup);
+      </script>
+    </template>
+
+    <template data-demo="libs">
+      <section class="lib-demo">
+        <input name="xyz" />
+        <img
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII="
+        />
+        <p><output>-</output></p>
+      </section>
+
+      <script type="module">
+        import { QRSocket } from "./QRSocket.js";
+        import QRious from "qrious";
+
+        (async function () {
+          const $el = document.querySelector(".lib-demo");
+          const $input = $el.querySelector("input");
+          const $img = $el.querySelector("img");
+          const $output = $el.querySelector("output");
+
+          const detector = new BarcodeDetector({
+            formats: ["qr_code"],
+          });
+
+          $input.addEventListener("input", async (e) => {
+            new QRious({
+              element: $img,
+              value: e.target.value,
+            });
+            console.log(e.target.value);
+
+            await new Promise(requestAnimationFrame);
+
+            detector.detect($img).then((re) => {
+              console.log("RRR", re);
+              $output.innerText = JSON.stringify(re);
+            });
+
+            //
+          });
+        })();
       </script>
     </template>
 

@@ -80,3 +80,21 @@ div.chatdemo {
 .send button {
   font-size: 2em;
 }
+
+.lib-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lib-demo img {
+  height: 30vmin;
+  width: 30vmin;
+  margin: 3vmin;
+}
+
+.lib-demo output {
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-width: 100%;
+}
