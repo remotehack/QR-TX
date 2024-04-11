@@ -4,6 +4,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="style.css" />
     <script src="simplepeer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.20/dist/index.js"></script>
+    <script>
+      try {
+        window["BarcodeDetector"].getSupportedFormats();
+      } catch {
+        window["BarcodeDetector"] =
+          barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
+      }
+    </script>
     <script type="importmap">
       {
         "imports": {
@@ -438,7 +448,7 @@
             });
             console.log(e.target.value);
 
-            await new Promise(requestAnimationFrame);
+            await new Promise((r) => setTimeout(r, 100));
 
             detector.detect($img).then((re) => {
               console.log("RRR", re);
