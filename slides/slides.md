@@ -1,4 +1,4 @@
-# 'Sup FOC
+## Replacing the internet with QR Codes
 
 ---
 
@@ -22,13 +22,15 @@
 
 ---
 
-How to build this
+Can we build this?
 
 ---
 
 ![fit](images/qrious.png)
 
 ![fit](images/barcode-detector.png)
+
+![fit](images/get-user-media.png)
 
 ---
 
@@ -46,35 +48,16 @@ const detector = new BarcodeDetector({
   formats: ["qr_code"],
 });
 
-for (const code of detector.detect(image)) {
+for (const code of detector.detect(video)) {
   alert(code.rawValue); // "https://your-cool-site.com"!
 }
 ```
 
----
-
-```js
-// Show a QR Code
-new QRious({
-  element: this.element.querySelector(`#qrcode`),
-  value: '["foo", "bar"]',
-});
-
-// --- other device ---
-
-// Read a QR Code
-const detector = new BarcodeDetector({
-  formats: ["qr_code"],
-});
-
-for (const code of detector.detect(image)) {
-  alert(code.rawValue); // "[\"foo\", \"bar\"]!
-}
-```
+[Live Demo](https://remotehack.space/QR-TX/?demo=libs)
 
 ---
 
-the "protocol"
+"the protocol"
 
 # [fit] `[RX, TX, MESSAGE]`
 
@@ -96,4 +79,8 @@ the "protocol"
 
 # remotehack.space/QR-TX
 
-(chrome/android only currently)
+![fit](images/remote-hack.png)
+
+## ⓧ @benjaminbenben (?)
+
+## 📷 @benfoxall
