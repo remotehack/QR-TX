@@ -13,7 +13,7 @@ const template = new DOMParser().parseFromString(`
         <figcaption>[]</figcaption>
     </figure>
     <figure class="video">
-        <video></video>
+        <canvas width="300" height="300"></canvas>
         <figcaption>[]</figcaption>
     </figure>
 
@@ -32,7 +32,7 @@ const template = new DOMParser().parseFromString(`
         width: 50vmin;
         aspect-ratio: 1 / 1;
     }
-    .${className} video {
+    .${className} canvas {
         height: 25vmin;
         width: 25vmin;
         object-fit:cover;
@@ -108,17 +108,48 @@ export class QRSocket extends EventTarget {
             audio: false
         });
 
-        const video = this.element.querySelector('video');
+        const canvas = this.element.querySelector('canvas');
+        const ctx = canvas.getContext('2d')
+
+        // const video = this.element.querySelector('video');
+        const video = document.createElement('video');
         video.srcObject = stream;
-        video.play()
+
+        // trying to get ios not going fullscreen
+        video.autoplay = true;
+        video.playsinline = true;
+        video.muted = true; // Mute the video
+        video.setAttribute('playsinline', ''); // Set playsinline attribute
+
+        video.addEventListener('canplay', () => {
+            canvas.width = video.videoWidth || 100;
+            canvas.height = video.videoHeight || 100;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        })
+
+        try {
+            await video.play()
+        } catch (e) {
+            console.log("adding play on click")
+            document.body.addEventListener('touchstart', (e) => {
+                e.preventDefault()
+                video.play()
+            }, { once: true })
+        }
+
 
         this.running = true;
+
+
 
         const check = async () => {
             await new Promise(re => setTimeout(re, 2000))
             while (this.running) {
+
                 try {
                     const codes = await detector.detect(video)
+
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
                     for (const code of codes) {
                         const completed = this.sock.handleObservation(code.rawValue);
@@ -130,6 +161,19 @@ export class QRSocket extends EventTarget {
                         }
 
                         this.element.querySelector('.video figcaption').innerText = code.rawValue
+
+                        // console.log(code)
+                        ctx.beginPath()
+                        const firstPoint = code.cornerPoints[0];
+                        ctx.moveTo(firstPoint.x, firstPoint.y); // Set the starting point
+                        for (const { x, y } of code.cornerPoints) {
+                            ctx.lineTo(x, y)
+                            console.log(x, y)
+                        }
+                        ctx.closePath()
+                        ctx.fillStyle = '#f088'
+                        ctx.strokeWidth = 20
+                        ctx.fill()
 
                     }
 
