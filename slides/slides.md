@@ -59,7 +59,9 @@ for (const code of detector.detect(video)) {
 
 "the protocol"
 
-# [fit] `[RX, TX, MESSAGE]`
+# [fit] 1. http://example.com/hello.html
+
+# [fit] 2+. `[RX, TX, MESSAGE]`
 
 ---
 
@@ -67,13 +69,13 @@ for (const code of detector.detect(video)) {
 
 [Sending messages](https://remotehack.space/QR-TX/?demo=send)
 
-[Speed test](https://remotehack.space/QR-TX/?demo=speed)
-
 [Chat](https://remotehack.space/QR-TX/?demo=chat)
 
 [qRPC](https://remotehack.space/QR-TX/?demo=rpc)
 
-[Signalling](https://remotehack.space/QR-TX/?demo=signalling)
+[Speed test](https://remotehack.space/QR-TX/?demo=speed)
+
+[Signalling](https://remotehack.space/QR-TX/?demo=signal)
 
 ---
 
