@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "mocha lib",
-    "build": "workbox-cli generateSW ./workbox-config.cjs"
+    "build": "workbox generateSW ./workbox-config.cjs"
   },
   "repository": {
     "type": "git",
