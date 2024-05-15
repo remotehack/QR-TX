@@ -5,7 +5,8 @@
   "main": "QRSocket.js",
   "type": "module",
   "scripts": {
-    "test": "mocha lib"
+    "test": "mocha lib",
+    "build": "workbox-cli generateSW ./workbox-config.cjs"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "chai": "^5.1.0",
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "workbox-cli": "^7.1.0"
   }
 }
