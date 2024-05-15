@@ -485,6 +485,12 @@
           console.warn(`No demo found for ${demo}`);
         }
       }
+
+      if (location.protocol === "https:" && "serviceWorker" in navigator) {
+        window.addEventListener("load", () =>
+          navigator.serviceWorker.register("sw.js")
+        );
+      }
     </script>
   </body>
 </html>
