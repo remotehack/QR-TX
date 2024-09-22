@@ -374,7 +374,15 @@
           const stream = qsock.stream;
           if (!stream) throw new Error("No stream"); //debug
 
-          var peer = new Peer({ initiator, stream });
+          const config = await fetch('https://nice.benfoxall.workers.dev/qr-tx')
+            .then(config => {
+              // cloudflare/cloudflare-docs#17007
+              config.iceServers = [config.iceServers]
+              return config;
+            })
+            .catch(() => undefined)
+
+          var peer = new Peer({ initiator, stream, config });
 
           peer.on("signal", (data) => {
             qsock.send(JSON.stringify(data));
