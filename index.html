@@ -375,6 +375,7 @@
           if (!stream) throw new Error("No stream"); //debug
 
           const config = await fetch('https://nice.benfoxall.workers.dev/qr-tx')
+            .then(res => res.json())
             .then(config => {
               // cloudflare/cloudflare-docs#17007
               config.iceServers = [config.iceServers]
